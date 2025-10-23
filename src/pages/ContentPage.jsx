@@ -6,7 +6,7 @@ const specialDays = {
   '2025-10-07': {
     title: '🎉 誕生日おめでとう！ 🎉',
     cardText: 'ももかへ\n誕生日おめでとう！\nサプライズとしてこんなものを作ってみました．\nこのウェブに，2人の思い出をたくさん記録できたら\n嬉しいな．\n生まれてきてくれてありがとう！大好き！\nしゅんより',
-    videoSrc: '/videos/birthday.mp4',
+    videoSrc: '/videos/birthday.mp4', // パスは / から始まる前提
   },
   '2025-10-23': {
     title: '3周年おめでとう！ ',
@@ -15,9 +15,21 @@ const specialDays = {
   '2026-01-01': {
     title: '🌅 あけましておめでとう！ 🌅',
     cardText: '2026年も素晴らしい年になりますように。今年もよろしく！',
-    videoSrc: '/videos/newyear.mp4',
+    videoSrc: '/videos/newyear.mp4', // パスは / から始まる前提
   },
 };
+
+// publicフォルダ内のアセットパスを正しく処理する関数
+// BASE_URLが '/' (ローカル) の場合 -> /videos/birthday.mp4
+// BASE_URLが '/forReact-vite/' (GitHub Pages) の場合 -> /forReact-vite/videos/birthday.mp4
+const getPublicAssetPath = (path) => {
+  if (!path) return null;
+  // import.meta.env.BASE_URL は末尾に / が含まれる (例: /forReact-vite/)
+  // path は先頭に / が含まれる (例: /videos/birthday.mp4)
+  // pathから先頭の / を削除して結合する
+  return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+};
+
 
 function ContentPage() {
   const today = new Date();
@@ -27,6 +39,9 @@ function ContentPage() {
   const todayDay = today.getDate();
   const todayKey = `${todayYear}-${String(todayMonth).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
   const todaySpecialContent = specialDays[todayKey];
+
+  // ★ 修正点 1: 今日の動画パスを処理
+  const todayVideoPath = getPublicAssetPath(todaySpecialContent?.videoSrc);
 
   const [inputYear, setInputYear] = useState('2025');
   const [inputMonth, setInputMonth] = useState('10');
@@ -54,6 +69,9 @@ function ContentPage() {
       setFoundContent({ notFound: true, date: lookupKey });
     }
   };
+  
+  // ★ 修正点 2: 検索結果の動画パスを処理
+  const foundVideoPath = getPublicAssetPath(foundContent?.videoSrc);
 
   return (
     <div style={{ 
@@ -66,7 +84,6 @@ function ContentPage() {
     }}>
       <h1>{`${todayYear}/${todayMonth}/${todayDay}`}</h1>
       <hr />
-      {/* ★ 修正点: 記念日当日の表示を、検索結果と同様の単一コンテナにまとめました */}
       {todaySpecialContent ? (
         <div style={{ width: '500px', margin: '0 auto 30px auto', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', boxSizing: 'border-box' , backgroundColor: '#ffe8e8' }}>
           <h3>{todaySpecialContent.title}</h3>
@@ -85,8 +102,9 @@ function ContentPage() {
               <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{todaySpecialContent.cardText}</p>
             </div>
           )}
-          {todaySpecialContent.videoSrc && ( 
-            <video controls width="100%" src={todaySpecialContent.videoSrc} type="video/mp4">ブラウザが合わないみたい……</video> 
+          {/* ★ 修正点 3: 処理したパスを使用 */}
+          {todayVideoPath && ( 
+            <video controls width="100%" src={todayVideoPath} type="video/mp4">ブラウザが合わないみたい……</video> 
           )}
         </div>
       ) : ( 
@@ -97,12 +115,11 @@ function ContentPage() {
       )}
       
       {today >= memoriesSectionStartDate && (
-        // ★ 修正点: 上の余白(margin)を追加し、背景色を半透明の白に変更
         <div style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.7)', // 半透明の白
+          backgroundColor: 'rgba(255, 255, 255, 0.7)', 
           padding: '20px', 
           borderRadius: '8px',
-          marginTop: '100px', // 上の余白を追加
+          marginTop: '100px', 
         }}>
           <h2>思い出</h2>
           <p>見たい記念日の日付を入力してね。</p>
@@ -136,8 +153,9 @@ function ContentPage() {
                       <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{foundContent.cardText}</p>
                     </div>
                   )}
-                  {foundContent.videoSrc && (
-                    <video controls width="100%" src={foundContent.videoSrc} type="video/mp4">
+                  {/* ★ 修正点 4: 処理したパスを使用 */}
+                  {foundVideoPath && (
+                    <video controls width="100%" src={foundVideoPath} type="video/mp4">
                       ブラウザが合わないみたい……
                     </video>
                   )}
