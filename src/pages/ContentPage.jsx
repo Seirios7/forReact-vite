@@ -18,7 +18,7 @@ const specialDays = {
   },
   '2025-12-26': {
     title: 'やっほー！見てる？ ',
-    cardText: 'おはよ！',
+    cardText: 'おはよ！愛してるぜっ！',
   },
 };
 
